@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resursă Mobilă - EPA-SMURD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #4b77a5; color: white; margin: 0; overflow-x: hidden; height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .tile-btn {
+            color: white;
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            position: relative;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.15s ease-in-out;
+            border: 1px solid rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        .cad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-inactiv-total {
+            background: linear-gradient(180deg, #3a4753 0%, #2c353f 100%) !important;
+            opacity: 0.6;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .tile-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background-color: rgba(0, 0, 0, 0.35);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 1px;
+        }
+
+        .bg-misiuni-normal { background: linear-gradient(180deg, #596b7c 0%, #465565 100%); }
+        .bg-misiuni-alert { background: linear-gradient(180deg, #e53935 0%, #c62828 100%) !important; animation: pulse-red 0.8s infinite alternate; pointer-events: auto !important; opacity: 1 !important; cursor: pointer; }
+        
+        .bg-misiune-curenta-inactiv { background: linear-gradient(180deg, #596b7c 0%, #465565 100%); }
+        .bg-misiune-curenta-activ { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
+
+        .bg-mesaje { background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%) !important; }
+        .bg-terminate { background: #4b77a5 !important; }
+        .bg-stare { background: linear-gradient(180deg, #22c55e 0%, #15803d 100%) !important; }
+
+        .bg-proceduri { background: linear-gradient(180deg, #f97316 0%, #ea580c 100%); }
+        .bg-interogari { background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); }
+        .bg-audit { background: linear-gradient(180deg, #84cc16 0%, #65a30d 100%); }
+        .bg-consum { background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%); }
+        .bg-profil { background: linear-gradient(180deg, #b45309 0%, #78350f 100%); }
+        .bg-setari { background: linear-gradient(180deg, #b45309 0%, #78350f 100%); }
+        .bg-schimbare { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
+
+        .status-btn { background-color: #ea580c; border: 1px solid #b45309; transition: all 0.15s ease-in-out; }
+        .status-activ { background-color: #4678a8 !important; border-color: #1d4ed8 !important; }
+        .status-inactiv-gri { background-color: #596b7c !important; border-color: #333 !important; }
+
+        @keyframes pulse-red {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.25); }
+        }
+
+        .form-input {
+            background-color: #f1f3f5;
+            color: #000000;
+            border: 1px solid #b0bec5;
+            padding: 2px 4px;
+            font-size: 11px;
+            width: 100%;
+        }
+        
+        .form-input-descriere {
+            background-color: #f1f3f5;
+            color: #dc2626;
+            font-weight: bold;
+            border: 1px solid #b0bec5;
+            padding: 4px 6px;
+            font-size: 11px;
+            width: 100%;
+            height: 38px;
+            resize: none;
+        }
+
+        .form-label {
+            font-weight: bold;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .section-box {
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            border-radius: 2px;
+            padding: 6px 8px;
+            display: flex;
+            gap: 6px;
+            align-items: stretch;
+        }
+
+        .section-title {
+            width: 80px;
+            font-weight: bold;
+            font-size: 11px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            border-right: 1px solid #cbd5e1;
+            padding-right: 6px;
+        }
+
+        .status-setare-tile {
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            border: 1px solid rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-between select-none bg-[#4b77a5]">
+
+    <audio id="sunet-smurd" src="Tableta_Smurd_amplificat.wav" preload="auto"></audio>
+
+    <header class="bg-[#4b77a5] px-3 py-1.5 border-b border-cyan-600/40 flex justify-between items-center shadow-sm shrink-0">
+        <div class="flex items-center gap-4">
+            <div>
+                <div class="font-bold text-sm md:text-base text-white tracking-wide">EPA-SMURD</div>
+                <div class="text-xs md:text-base text-cyan-200 font-mono">MAI63162</div>
+            </div>
+            <div id="header-titlu" class="text-xs md:text-base font-bold text-white tracking-wide">
+                Meniu principal
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-1.5 text-xs">
+            <button onclick="deschideMeniu()" class="bg-[#3b648f] px-2 py-1 rounded hover:bg-[#5983b0]"><i class="fa-solid fa-house text-cyan-200"></i></button>
+            <div id="header-alert" class="bg-[#3b648f] text-white px-2 py-0.5 rounded font-bold border border-cyan-500/50">0</div>
+            <button class="bg-[#3b648f] px-2 py-1 rounded hover:bg-[#5983b0]"><i class="fa-solid fa-comment"></i> 0</button>
+            <button class="bg-[#3b648f] px-2 py-1 rounded hover:bg-[#5983b0]"><i class="fa-solid fa-truck-slash"></i> 0</button>
+            <button id="btn-back" onclick="deschideMeniu()" class="bg-[#3b648f] px-2 py-1 rounded hover:bg-[#5983b0] hidden"><i class="fa-solid fa-arrow-left text-white"></i></button>
+        </div>
+    </header>
+
+    <!-- ECRAN 1: MENIU PRINCIPAL -->
+    <main id="ecran-meniu" class="flex-1 p-2 flex flex-col justify-center relative w-full bg-[#4b77a5]" style="padding-left: 10px; padding-right: 10px;">
+        
+        <div class="bg-white p-2 rounded shadow-md w-full flex flex-col justify-center border border-gray-300 overflow-y-auto" style="max-height: 80vh;">
+            
+            <div class="cad-grid">
+                <button id="btn-misiuni" onclick="gestioneazaClickMisiuniNepreluate()" class="tile-btn btn-inactiv-total">
+                    <span id="badge-misiuni" class="tile-badge">0</span>
+                    <i class="fa-solid fa-ambulance text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Misiuni nepreluate</span>
+                </button>
+
+                <button id="btn-misiune-curenta" onclick="deschideFisaMisiuneCurenta()" class="tile-btn btn-inactiv-total">
+                    <span id="badge-misiune-curenta" class="tile-badge">0</span>
+                    <i class="fa-solid fa-ambulance text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Misiune curentă</span>
+                </button>
+
+                <button onclick="alert('Mesaje dispecerat')" class="tile-btn bg-mesaje">
+                    <span class="tile-badge">0</span>
+                    <i class="fa-solid fa-comment-dots text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Mesaje</span>
+                </button>
+
+                <button onclick="gestioneazaClickMisiuniTerminate()" class="tile-btn bg-terminate cursor-pointer">
+                    <span id="badge-terminate" class="tile-badge">0</span>
+                    <i class="fa-solid fa-ambulance text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Misiuni terminate</span>
+                </button>
+
+                <button onclick="alert('Stare resursă')" class="tile-btn bg-stare">
+                    <i class="fa-solid fa-gear text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Stare resursă</span>
+                </button>
+
+                <button class="tile-btn bg-proceduri"><i class="fa-solid fa-gears text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Proceduri</span></button>
+                <button class="tile-btn bg-interogari"><i class="fa-solid fa-magnifying-glass text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Interogări externe</span></button>
+                <button class="tile-btn bg-audit"><i class="fa-solid fa-exclamation-circle text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Audit</span></button>
+                <button class="tile-btn bg-consum"><i class="fa-solid fa-kit-medical text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Consum pe tură</span></button>
+                <button class="tile-btn bg-profil"><i class="fa-solid fa-user-gear text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Profil</span></button>
+                <button class="tile-btn bg-setari"><i class="fa-solid fa-sliders text-3xl mt-2 text-white"></i><span class="text-xs font-semibold text-center leading-tight mb-1">Setări</span></button>
+                <button class="tile-btn bg-schimbare">
+                    <i class="fa-solid fa-key text-3xl mt-2 text-white"></i>
+                    <span class="text-xs font-semibold text-center leading-tight mb-1">Schimbare autentificare</span>
+                </button>
+            </div>
+
+        </div>
+
+        <button onclick="simuleazaMisiuneNoua()" title="Simulare misiune nouă 112" class="absolute bottom-2 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition shadow z-50 cursor-pointer">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+    </main>
+
+    <!-- ECRAN 1.5: LISTA DE MISIUNI NEPRELUATE SAU TERMINATE -->
+    <main id="ecran-lista-misiuni" class="flex-1 bg-[#4b77a5] p-3 hidden flex flex-col justify-center relative w-full" style="padding-left: 10px; padding-right: 10px;">
+        <div class="bg-white p-3 rounded shadow-md w-full flex flex-col border border-gray-300 overflow-y-auto" style="max-height: 80vh;">
+            <div id="titlu-lista-ecran" class="text-xs font-bold text-gray-900 mb-2 border-b pb-1">Misiuni disponibile:</div>
+            <div id="container-lista-cazuri" class="flex flex-col gap-2"></div>
+        </div>
+    </main>
+
+    <!-- ECRAN 2: FIȘĂ CAZ MISIUNE -->
+    <main id="ecran-misiune" class="flex-1 bg-[#4b77a5] text-black p-1.5 hidden flex flex-col md:flex-row gap-1.5 overflow-y-auto">
+        
+        <!-- Meniul lateral stânga -->
+        <div class="w-full md:w-48 bg-[#4b77a5] p-1 flex flex-row md:flex-col gap-1 text-white text-xs font-semibold shrink-0 overflow-x-auto">
+            <button class="bg-[#3b648f] p-2 text-left border-l-4 border-cyan-400 flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-ambulance"></i> Misiune curentă</button>
+            <button onclick="deschideFisaPrespitaliceasca()" class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap cursor-pointer"><i class="fa-solid fa-file-lines"></i> Fișe prespitalicești</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-gauge"></i> Km parcurși</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-magnifying-glass"></i> Interogări externe</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-notes-medical"></i> Istoric medical</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-folder"></i> Fișiere misiune</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-camera"></i> Preluare imagine</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-comment"></i> Mesaje</button>
+        </div>
+
+        <!-- Containerul principal cu fond alb -->
+        <div class="flex-1 bg-white p-1.5 border border-gray-400 rounded flex flex-col md:flex-row gap-1.5 overflow-y-auto shadow-md">
+
+            <!-- Coloana cu butoanele de status -->
+            <div id="coloana-status-misiune" class="w-full md:w-32 flex flex-row md:flex-col justify-between gap-1 shrink-0">
+                <button id="btn-status-spre-caz" class="status-btn p-1.5 rounded flex flex-col items-center justify-between shadow flex-1 text-white font-bold text-xs">
+                    <div class="flex items-center justify-center gap-1 w-full text-sm">
+                        <i class="fa-solid fa-ambulance"></i>
+                        <i class="fa-solid fa-road text-[10px]"></i>
+                    </div>
+                    <span class="text-[10px]">Spre caz</span>
+                </button>
+                <button id="btn-status-destinatie" class="status-btn p-1.5 rounded flex flex-col items-center justify-between shadow flex-1 text-white font-bold text-xs">
+                    <div class="flex items-center justify-center gap-1 w-full text-sm">
+                        <i class="fa-solid fa-ambulance"></i>
+                        <i class="fa-solid fa-house-medical text-[10px]"></i>
+                    </div>
+                    <span class="text-[10px]">La destinație</span>
+                </button>
+                <button id="btn-status-la-caz" class="status-btn p-1.5 rounded flex flex-col items-center justify-between shadow flex-1 text-white font-bold text-xs">
+                    <div class="flex items-center justify-center gap-1 w-full text-sm">
+                        <i class="fa-solid fa-ambulance"></i>
+                        <i class="fa-solid fa-user-doctor text-[10px]"></i>
+                    </div>
+                    <span class="text-[10px]">La caz</span>
+                </button>
+                <button id="btn-status-spre-spital" class="status-btn p-1.5 rounded flex flex-col items-center justify-between shadow flex-1 text-white font-bold text-xs">
+                    <div class="flex items-center justify-center gap-1 w-full text-sm">
+                        <i class="fa-solid fa-ambulance"></i>
+                        <i class="fa-solid fa-hospital text-[10px]"></i>
+                    </div>
+                    <span class="text-[10px]">Spre spital</span>
+                </button>
+                <button id="btn-status-la-spital" class="status-btn p-1.5 rounded flex flex-col items-center justify-between shadow flex-1 text-white font-bold text-xs">
+                    <div class="flex items-center justify-center gap-1 w-full text-sm">
+                        <i class="fa-solid fa-ambulance"></i>
+                        <i class="fa-solid fa-hospital-user text-[10px]"></i>
+                    </div>
+                    <span class="text-[10px]">La spital</span>
+                </button>
+                <button id="btn-selectie-status-⚙️" onclick="deschideStareResursa()" class="bg-[#2d5882] hover:bg-[#3d6f9e] p-1.5 rounded text-[10px] text-center text-white font-bold shadow shrink-0 mt-1 cursor-pointer">Selectie status misiune ⚙️</button>
+            </div>
+
+            <!-- Partea dreaptă: Secțiunile compacte -->
+            <div class="flex-1 bg-gray-50 p-1.5 border border-gray-300 rounded text-xs flex flex-col justify-between overflow-y-auto">
+                
+                <div class="space-y-1.5 flex-1 flex flex-col justify-between">
+                    
+                    <!-- Chenar MISIUNE -->
+                    <div class="section-box" style="padding-top: 10px; padding-bottom: 10px;">
+                        <div class="section-title">MISIUNE</div>
+                        <div class="flex-1 space-y-1.5">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                                <div><span class="form-label">Id 112:</span> <input id="val-id112" type="text" class="form-input font-bold text-blue-700" readonly></div>
+                                <div><span class="form-label">Id misiune:</span> <input id="val-idmisiune" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Data:</span> <input id="val-data" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Status:</span> <input id="fisa-status" type="text" class="form-input font-bold text-orange-600" value="Nouă (Nepreluată)" readonly></div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-1"><span class="form-label w-16">Index1:</span> <input id="val-index1" type="text" class="form-input font-semibold" readonly></div>
+                                <div class="flex items-center gap-1"><span class="form-label w-16">Index2:</span> <input id="val-index2" type="text" class="form-input font-semibold" readonly></div>
+                                <div class="flex items-start gap-1">
+                                    <span class="form-label w-16 pt-1">Descriere:</span> 
+                                    <textarea id="val-descriere" class="form-input-descriere" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chenar ADRESĂ -->
+                    <div class="section-box">
+                        <div class="section-title">ADRESĂ</div>
+                        <div class="flex-1 space-y-1">
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-1.5">
+                                <div><span class="form-label">Județ:</span> <input id="val-judet" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Mun/Com:</span> <input id="val-mun" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Stradă:</span> <input id="val-strada" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Nr:</span> <input id="val-nr" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Sector:</span> <input id="val-sector" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Scară / Etaj / Ap:</span> <input id="val-ap" type="text" class="form-input" readonly></div>
+                            </div>
+                            <div><span class="form-label">Reper:</span> <input id="val-reper" type="text" class="form-input" readonly></div>
+                        </div>
+                    </div>
+
+                    <!-- Chenar VICTIMĂ -->
+                    <div class="section-box">
+                        <div class="section-title">VICTIMĂ</div>
+                        <div class="flex-1 space-y-1">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                                <div><span class="form-label">Nume:</span> <input id="val-nume-v" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Prenume:</span> <input id="val-prenume-v" type="text" class="form-input" readonly></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <div><span class="form-label">Vârstă:</span> <input id="val-varsta" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Sex:</span> <input id="val-sex" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">CNP:</span> <input id="val-cnp" type="text" class="form-input" readonly></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chenar APELANT -->
+                    <div class="section-box">
+                        <div class="section-title">APELANT</div>
+                        <div class="flex-1 space-y-1">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                                <div><span class="form-label">Nume:</span> <input id="val-nume-a" type="text" class="form-input" readonly></div>
+                                <div><span class="form-label">Prenume:</span> <input id="val-prenume-a" type="text" class="form-input" readonly></div>
+                            </div>
+                            <div><span class="form-label">Telefon:</span> <input id="val-telefon" type="text" class="form-input font-bold" readonly></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Butoanele Accepta / Refuza -->
+                <div id="panou-accept-refuz" class="flex gap-2 mt-1.5 pt-1 border-t border-gray-300 hidden">
+                    <button onclick="acceptaMisiuneaCurenta()" class="flex-1 bg-[#2563eb] hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-xs shadow flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Accepta</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button onclick="refuzaMisiuneaCurenta()" class="flex-1 bg-[#2563eb] hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-xs shadow flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Refuza</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ECRAN: FIȘĂ PRESPITALICEASCĂ -->
+    <main id="ecran-fisa-prespitaliceasca" class="flex-1 bg-[#4b77a5] text-black p-1.5 hidden flex flex-col md:flex-row gap-1.5 overflow-y-auto">
+        
+        <!-- Meniul lateral stânga din Fişa Prehospitalicească -->
+        <div class="w-full md:w-56 bg-[#4b77a5] p-1 flex flex-row md:flex-col gap-1 text-white text-xs font-semibold shrink-0 overflow-x-auto">
+            <div class="bg-[#2d5882] text-cyan-200 p-2 font-mono text-[11px] mb-1">GLAMBTEST</div>
+            <button class="bg-[#3b648f] p-2 text-left border-l-4 border-cyan-400 flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-arrow-right text-[10px]"></i> Date generale</button>
+            <button class="bg-[#d1d5db] text-gray-800 p-2 text-left hover:bg-white flex items-center gap-2 whitespace-nowrap">Stare preluare</button>
+            <button class="bg-[#d1d5db] text-gray-800 p-2 text-left hover:bg-white flex items-center gap-2 whitespace-nowrap">Evolutie</button>
+            <button class="bg-[#d1d5db] text-gray-800 p-2 text-left hover:bg-white flex items-center gap-2 whitespace-nowrap">Tratament</button>
+            <button class="bg-[#d1d5db] text-gray-800 p-2 text-left hover:bg-white flex items-center gap-2 whitespace-nowrap">Final</button>
+            
+            <div class="my-2 border-t border-cyan-600/50"></div>
+            
+            <button onclick="deschideFisaMisiuneCurenta()" class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-ambulance"></i> Misiune curentă</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-hospital"></i> Alocare UPU</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-camera"></i> Preluare imagine</button>
+            <button class="bg-[#3b648f] p-2 text-left hover:bg-[#5983b0] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-flag-checkered"></i> Finalizare</button>
+        </div>
+
+        <!-- Conținutul central cu chenarele verzi -->
+        <div class="flex-1 bg-white p-4 border border-gray-400 rounded flex flex-col md:flex-row gap-4 overflow-y-auto shadow-md">
+            
+            <!-- Coloana 1: DETALII INTERVENȚIE -->
+            <div class="flex flex-col gap-3 flex-1">
+                <div class="text-xs font-bold text-gray-800 border-b pb-1">DETALII INTERVENTIE</div>
+                <button onclick="alertDeschidereChenar('Detalii urgență')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded shadow flex flex-col justify-between items-start h-24 text-left transition cursor-pointer relative">
+                    <span class="text-sm tracking-wide">DETALII URGENTA</span>
+                </button>
+                <button onclick="deschideTimpiInterventie()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded shadow flex flex-col justify-between items-start h-24 text-left transition cursor-pointer relative">
+                    <span class="text-xs absolute top-2 right-2 bg-emerald-800 text-white px-2 py-0.5 rounded font-mono text-[11px]" id="badge-timpi-count">0</span>
+                    <span class="text-sm tracking-wide">TIMPI INTERVENTIE</span>
+                </button>
+            </div>
+
+            <!-- Coloana 2: PACIENT -->
+            <div class="flex flex-col gap-3 flex-1">
+                <div class="text-xs font-bold text-gray-800 border-b pb-1">PACIENT</div>
+                <button onclick="alertDeschidereChenar('Detalii pacient')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded shadow flex flex-col justify-between items-start h-24 text-left transition cursor-pointer relative">
+                    <span class="text-xs absolute top-2 right-2 bg-emerald-800 text-white px-2 py-0.5 rounded font-mono text-[11px]">2</span>
+                    <span class="text-sm tracking-wide">DETALII PACIENT</span>
+                </button>
+                <button onclick="alertDeschidereChenar('Stare pacient')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded shadow flex flex-col justify-between items-start h-24 text-left transition cursor-pointer relative">
+                    <span class="text-xs absolute top-2 right-2 bg-emerald-800 text-white px-2 py-0.5 rounded font-mono text-[11px]">2</span>
+                    <span class="text-sm tracking-wide">STARE PACIENT</span>
+                </button>
+            </div>
+
+            <!-- Coloana 3: DIAGNOSTIC -->
+            <div class="flex flex-col gap-3 flex-1">
+                <div class="text-xs font-bold text-gray-800 border-b pb-1">DIAGNOSTIC</div>
+                <button onclick="alertDeschidereChenar('Diagnostic')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded shadow flex flex-col justify-between items-start h-24 text-left transition cursor-pointer relative">
+                    <span class="text-xs absolute top-2 right-2 bg-emerald-800 text-white px-2 py-0.5 rounded font-mono text-[11px]">2</span>
+                    <span class="text-sm tracking-wide">DIAGNOSTIC</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ECRAN NOU: TABEL TIMPI INTERVENȚIE -->
+    <main id="ecran-tabel-timpi" class="flex-1 bg-[#4b77a5] text-black p-3 hidden flex flex-col justify-center relative w-full" style="padding-left: 10px; padding-right: 10px;">
+        <div class="bg-white p-4 rounded shadow-md w-full flex flex-col border border-gray-300 overflow-y-auto" style="max-height: 80vh;">
+            <div class="flex justify-between items-center border-b pb-2 mb-3">
+                <div class="text-sm font-bold text-gray-900"><i class="fa-solid fa-clock text-blue-600 mr-1"></i> Istoric Timpi Intervenție</div>
+                <button onclick="deschideFisaPrespitaliceasca()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-3 py-1 rounded text-xs"><i class="fa-solid fa-arrow-left"></i> Înapoi</button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-gray-300 text-xs text-left">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-800">
+                            <th class="border border-gray-300 p-2">Status / Acțiune</th>
+                            <th class="border border-gray-300 p-2">Ora înregistrată</th>
+                            <th class="border border-gray-300 p-2">Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-timpi-body">
+                        <!-- Rândurile se generează dinamic -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ECRAN 3: FEREASTRA NOUĂ "SETARI STATUS MISIUNE" -->
+    <main id="ecran-stare-resursa" class="flex-1 bg-[#4b77a5] p-2 hidden flex flex-col justify-center relative w-full" style="padding-left: 10px; padding-right: 10px;">
+        <div class="bg-white p-3 rounded shadow-md w-full flex flex-col justify-center border border-gray-300 overflow-y-auto" style="max-height: 80vh;">
+            <div class="flex flex-col gap-3 w-full h-full p-2">
+                <div class="text-xs font-semibold text-gray-700">Selectați starea curentă a misiunii.</div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                    <button onclick="schimbaStareResursaDinMeniu('Spre caz')" class="status-setare-tile bg-[#ea580c]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-road text-sm"></i></div>
+                        <span>Spre caz</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('La destinație')" class="status-setare-tile bg-[#15803d]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-house-medical text-sm"></i></div>
+                        <span>La destinație</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('La caz')" class="status-setare-tile bg-[#ea580c]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-user-doctor text-sm"></i></div>
+                        <span>La caz</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('Spre spital')" class="status-setare-tile bg-[#7e22ce]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-hospital text-sm"></i></div>
+                        <span>Spre spital</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('La spital')" class="status-setare-tile bg-[#1d4ed8]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-hospital-user text-sm"></i></div>
+                        <span>La spital</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('Misiune anulata')" class="status-setare-tile bg-[#7e22ce]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-xmark text-sm"></i></div>
+                        <span>Misiune anulata</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('Pana fara pacient')" class="status-setare-tile bg-[#ea580c]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-road text-sm"></i></div>
+                        <span>Pana fara pacient</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('Pana cu pacient')" class="status-setare-tile bg-[#ea580c]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-user-injured text-sm"></i></div>
+                        <span>Pana cu pacient</span>
+                    </button>
+                    <button onclick="schimbaStareResursaDinMeniu('Terminat')" class="status-setare-tile bg-[#15803d]">
+                        <div class="flex items-center justify-between w-full text-base"><i class="fa-solid fa-ambulance"></i><i class="fa-solid fa-flag-checkered text-sm"></i></div>
+                        <span>Terminat</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-[#4b77a5] px-3 py-1.5 border-t border-cyan-600/40 flex justify-between items-center text-xs text-white shrink-0">
+        <div class="flex items-center pl-2">
+            <span id="txt-stare" class="font-bold text-xs md:text-sm text-white">Starea curentă: Disponibila</span>
+        </div>
+        <div class="flex items-center space-x-3 text-sm">
+            <i class="fa-solid fa-file-lines text-gray-200"></i>
+            <i class="fa-solid fa-question-circle text-gray-200"></i>
+            <i class="fa-solid fa-signal text-green-300"></i>
+            <i class="fa-solid fa-battery-three-quarters text-yellow-300"></i>
+        </div>
+    </footer>
+
+    <script>
+        const audio = document.getElementById('sunet-smurd');
+        let butonAnterior = null;
+
+        let listaMisiuniNepreluate = [];
+        let listaMisiuniTerminate = [];
+        let misiuneSelectataIndex = null;
+        let misiuneCurentaFizica = null;
+        let timpiInregistrati = [];
+
+        function obtineOraCurenta() {
+            const acum = new Date();
+            const ore = String(acum.getHours()).padStart(2, '0');
+            const minute = String(acum.getMinutes()).padStart(2, '0');
+            const secunde = String(acum.getSeconds()).padStart(2, '0');
+            return `${ore}:${minute}:${secunde}`;
+        }
+
+        function obtineDataCurenta() {
+            const acum = new Date();
+            const zi = String(acum.getDate()).padStart(2, '0');
+            const luna = String(acum.getMonth() + 1).padStart(2, '0');
+            const an = acum.getFullYear();
+            return `${zi}.${luna}.${an}`;
+        }
+
+        function inregistreazaTimpStatus(numeStatus) {
+            const ora = obtineOraCurenta();
+            const data = obtineDataCurenta();
+            
+            timpiInregistrati.push({ status: numeStatus, ora: ora, data: data });
+            
+            const badge = document.getElementById('badge-timpi-count');
+            if(badge) badge.innerText = timpiInregistrati.length;
+        }
+
+        function simuleazaMisiuneNoua() {
+            const idUnic = Math.floor(7298130 + Math.random() * 8000);
+            const idMis = 'EPA' + (listaMisiuniNepreluate.length + 1 + listaMisiuniTerminate.length);
+            
+            const cazuriRandom = [
+                { index1: 'ACCIDENT RUTIER', index2: 'CU VICTIME, CU PERSOANE BLOCATE', desc: 'O masina s-a rasturnat, a luat foc.', judet: 'DOLJ', mun: 'CRAIOVA', strada: 'Bd. Calea București', sector: 'Craiova', reper: 'Aproape de intrarea în pasaj' },
+                { index1: 'URGENȚĂ MEDICALĂ', index2: 'DURERI TORACICE ACUTE', desc: 'Pacient în vârstă acuza dureri puternice în piept, transpirații reci.', judet: 'GORJ', mun: 'TÂRGU JIU', strada: 'Str. Unirii', sector: 'Târgu Jiu', reper: 'Bloc 32, interfon 12' },
+                { index1: 'TRAUMĂ / CĂDERE', index2: 'CĂDERE DE LA ÎNĂLȚIME', desc: 'Persoană căzută de pe o schelă, politraumatizată, conștientă.', judet: 'OLT', mun: 'SLATINA', strada: 'Bd. A. I. Cuza', sector: 'Slatina', reper: 'În curtea șantierului' },
+                { index1: 'URGENȚĂ PEDIATRICĂ', index2: 'CONVULSII FEBRILE', desc: 'Copil mic cu febră ridicată și episoade convulsive.', judet: 'BUCUREȘTI', mun: 'BUCUREȘTI', strada: 'Bd. Timișoara', sector: 'Sector 6', reper: 'Aproape de intersecție' },
+                { index1: 'ACCIDENT RUTIER', index2: 'COLIZIUNE AUTO CU ACCIDENTAȚI', desc: 'Impact lateral între două autoturisme, două victime ușor rănite.', judet: 'DOLJ', mun: 'CALAFAT', strada: 'Str. Traian', sector: 'Calafat', reper: 'Lângă zona portuară' },
+                { index1: 'INCENDIU', index2: 'INCENDIU CASĂ', desc: 'Arde generalizat acoperișul unei locuințe, posibil persoane surprinse în interior.', judet: 'DOLJ', mun: 'CRAIOVA', strada: 'Str. Brestei', sector: 'Craiova', reper: 'La 200m de biserică' },
+                { index1: 'ACCIDENT RUTIER', index2: 'ACCIDENT RUTIER CU MOTOCICLETĂ', desc: 'Motociclist proiectat pe carosabil după impact cu un autoturism, inconstient.', judet: 'OLT', mun: 'SLATINA', strada: 'Str. Primăverii', sector: 'Slatina', reper: 'Intersecție semaforizată' },
+                { index1: 'ACCIDENT RUTIER', index2: 'PIETON LOVIT DE MAȘINĂ', desc: 'Pieton lovit pe trecerea de pietoni, sângerare abundentă la nivelul capului.', judet: 'GORJ', mun: 'TÂRGU JIU', strada: 'Calea Severinului', sector: 'Târgu Jiu', reper: 'În fața supermarketului' },
+                { index1: 'TRAUMĂ', index2: 'CĂZUT DIN COPAC', desc: 'Bărbat căzut de la aproximativ 4 metri în timp ce culegea fructe, dureri lombare severe.', judet: 'DOLJ', mun: 'CALAFAT', strada: 'Str. Dunării', sector: 'Calafat', reper: 'În livadă' },
+                { index1: 'URGENȚĂ MEDICALĂ', index2: 'DURERE PICIOR', desc: 'Pacient acuză dureri atroce la membrul inferior drept, suspiciune de fractură/tromboză.', judet: 'BUCUREȘTI', mun: 'BUCUREȘTI', strada: 'Șos. Colentina', sector: 'Sector 2', reper: 'Bloc 54, etaj 3' },
+                { index1: 'URGENȚĂ MAJORĂ', index2: 'PERSOANĂ INCONȘTIENTĂ, NU RESPIRĂ', desc: 'Stop cardiorespirator la domiciliu, aparținătorii efectuează manevre de resuscitare.', judet: 'DOLJ', mun: 'CRAIOVA', strada: 'Str. A. I. Cuza', sector: 'Craiova', reper: 'Zona Universitate' },
+                { index1: 'URGENȚĂ RESPIRATORIE', index2: 'DISPNEE', desc: 'Pacient cu criză severă de astm, cianozat, nu poate finaliza o propoziție.', judet: 'GORJ', mun: 'MOTRU', strada: 'Str. Jiului', sector: 'Motru', reper: 'Cartier Minerilor' },
+                { index1: 'URGENȚĂ MEDICALĂ', index2: 'DURERI ABDOMINALE', desc: 'Dureri abdominale violente cu iradiere, stare generală profund alterată.', judet: 'OLT', mun: 'CARACAL', strada: 'Str. Cuza Vodă', sector: 'Caracal', reper: 'Lângă piața centrală' },
+                { index1: 'ACCIDENT RUTIER', index2: 'BICICLIST LOVIT DE AUTO', desc: 'Biciclist acroșat de un autoturism în deplasare, prezintă traumatisme la membre.', judet: 'DOLJ', mun: 'CRAIOVA', strada: 'Calea Severinului', sector: 'Craiova', reper: 'Zona Dedeman' }
+            ];
+
+            const numeVictime = ['Ionescu Maria', 'Popa Gheorghe', 'Dumitrescu Elena', 'Stoica Ion', 'Constantin Ana', 'Radu Vasile', 'Bălan Cristian', 'Georgescu Mihaela'];
+            const varste = ['19 ani', '28 ani', '45 ani', '67 ani', '31 ani', '52 ani', '74 ani', '82 ani'];
+            const apelantiNume = ['Stancu', 'Georgescu', 'Marinescu', 'Florea', 'Moldovan', 'Vasile', 'Păun'];
+            const apelantiPrenume = ['Bogdan', 'Cristina', 'Vlad', 'Alina', 'Gabriel', 'Daniel', 'Elena'];
+
+            const cazAleator = cazuriRandom[Math.floor(Math.random() * cazuriRandom.length)];
+            const victimAleasa = numeVictime[Math.floor(Math.random() * numeVictime.length)].split(' ');
+            const sexAles = Math.random() > 0.5 ? 'Masculin' : 'Feminin';
+            const varstaAleasa = varste[Math.floor(Math.random() * varste.length)];
+
+            const cazNou = {
+                id112: idUnic,
+                idMisiune: idMis,
+                data: obtineDataCurenta() + ' ' + obtineOraCurenta(),
+                index1: cazAleator.index1,
+                index2: cazAleator.index2,
+                descriere: cazAleator.desc,
+                judet: cazAleator.judet,
+                mun: cazAleator.mun,
+                strada: cazAleator.strada,
+                nr: Math.floor(2 + Math.random() * 90),
+                sector: cazAleator.sector,
+                ap: Math.random() > 0.5 ? 'Ap. ' + Math.floor(1 + Math.random() * 50) : '-',
+                reper: cazAleator.reper,
+                numeV: victimAleasa[0],
+                prenumeV: victimAleasa[1],
+                varsta: varstaAleasa,
+                sex: sexAles,
+                cnp: (sexAles === 'Masculin' ? '1' : '2') + Math.floor(8000000000000 + Math.random() * 1999999999999),
+                numeA: apelantiNume[Math.floor(Math.random() * apelantiNume.length)],
+                prenumeA: apelantiPrenume[Math.floor(Math.random() * apelantiPrenume.length)],
+                telefon: '07' + Math.floor(10000000 + Math.random() * 89999999),
+                timpi: []
+            };
+
+            listaMisiuniNepreluate.push(cazNou);
+
+            const btnMisiuni = document.getElementById('btn-misiuni');
+            btnMisiuni.classList.remove('btn-inactiv-total', 'bg-misiuni-normal');
+            btnMisiuni.classList.add('bg-misiuni-alert');
+            
+            document.getElementById('badge-misiuni').innerText = listaMisiuniNepreluate.length;
+            
+            const headerAlert = document.getElementById('header-alert');
+            headerAlert.innerText = listaMisiuniNepreluate.length;
+            headerAlert.classList.add('bg-red-600');
+
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                console.log("Audio autoplay blocked by browser policy.");
+            });
+        }
+
+        function gestioneazaClickMisiuniNepreluate() {
+            if (listaMisiuniNepreluate.length === 0) return;
+
+            if (listaMisiuniNepreluate.length === 1) {
+                misiuneSelectataIndex = 0;
+                misiuneCurentaFizica = listaMisiuniNepreluate[0];
+                timpiInregistrati = misiuneCurentaFizica.timpi;
+                incarcaFisaMisiune(misiuneCurentaFizica);
+                document.getElementById('panou-accept-refuz').classList.remove('hidden');
+                deschideFisaMisiune();
+            } else {
+                const container = document.getElementById('container-lista-cazuri');
+                container.innerHTML = '';
+                document.getElementById('titlu-lista-ecran').innerText = 'Misiuni nepreluate disponibile:';
+                
+                listaMisiuniNepreluate.forEach((caz, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'p-2 bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded cursor-pointer flex justify-between items-center text-xs text-gray-900 font-medium';
+                    item.innerHTML = `<div><strong>${caz.idMisiune}</strong> - ${caz.index2} (${caz.strada}, ${caz.mun})</div> <span class="bg-red-600 text-white px-2 py-0.5 rounded font-bold">112</span>`;
+                    item.onclick = function() {
+                        misiuneSelectataIndex = index;
+                        misiuneCurentaFizica = caz;
+                        timpiInregistrati = caz.timpi;
+                        incarcaFisaMisiune(caz);
+                        document.getElementById('panou-accept-refuz').classList.remove('hidden');
+                        deschideFisaMisiune();
+                    };
+                    container.appendChild(item);
+                });
+
+                document.getElementById('ecran-meniu').classList.add('hidden');
+                document.getElementById('ecran-misiune').classList.add('hidden');
+                document.getElementById('ecran-stare-resursa').classList.add('hidden');
+                document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+                document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+                document.getElementById('ecran-lista-misiuni').classList.remove('hidden');
+                document.getElementById('header-titlu').innerText = 'Misiuni nepreluate';
+                document.getElementById('btn-back').classList.remove('hidden');
+            }
+        }
+
+        function gestioneazaClickMisiuniTerminate() {
+            if (listaMisiuniTerminate.length === 0) {
+                alert('Nu există nicio misiune terminată înregistrată.');
+                return;
+            }
+
+            const container = document.getElementById('container-lista-cazuri');
+            container.innerHTML = '';
+            document.getElementById('titlu-lista-ecran').innerText = 'Misiuni terminate (istoric):';
+            
+            listaMisiuniTerminate.forEach((caz) => {
+                const item = document.createElement('div');
+                item.className = 'p-2 bg-gray-100 hover:bg-green-50 border border-gray-300 rounded cursor-pointer flex justify-between items-center text-xs text-gray-900 font-medium';
+                item.innerHTML = `<div><strong>${caz.idMisiune}</strong> - ${caz.index2} (${caz.strada}, ${caz.mun})</div> <span class="bg-green-600 text-white px-2 py-0.5 rounded font-bold">Terminat</span>`;
+                item.onclick = function() {
+                    misiuneCurentaFizica = caz;
+                    timpiInregistrati = caz.timpi;
+                    incarcaFisaMisiuneTerminata(caz);
+                    document.getElementById('panou-accept-refuz').classList.add('hidden');
+                    deschideFisaMisiune();
+                };
+                container.appendChild(item);
+            });
+
+            document.getElementById('ecran-meniu').classList.add('hidden');
+            document.getElementById('ecran-misiune').classList.add('hidden');
+            document.getElementById('ecran-stare-resursa').classList.add('hidden');
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+            document.getElementById('ecran-lista-misiuni').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Misiuni terminate';
+            document.getElementById('btn-back').classList.remove('hidden');
+        }
+
+        function incarcaFisaMisiune(caz) {
+            document.getElementById('btn-selectie-status-⚙️').style.display = 'block';
+            const statusBtns = document.querySelectorAll('#coloana-status-misiune button.status-btn');
+            statusBtns.forEach(b => { b.style.pointerEvents = 'auto'; b.style.opacity = '1'; });
+
+            document.getElementById('val-id112').value = caz.id112;
+            document.getElementById('val-idmisiune').value = caz.idMisiune;
+            document.getElementById('val-data').value = caz.data;
+            document.getElementById('fisa-status').value = 'Activă / În desfășurare';
+            document.getElementById('val-index1').value = caz.index1;
+            document.getElementById('val-index2').value = caz.index2;
+            document.getElementById('val-descriere').value = caz.descriere;
+            document.getElementById('val-judet').value = caz.judet;
+            document.getElementById('val-mun').value = caz.mun;
+            document.getElementById('val-strada').value = caz.strada;
+            document.getElementById('val-nr').value = caz.nr;
+            document.getElementById('val-sector').value = caz.sector;
+            document.getElementById('val-ap').value = caz.ap;
+            document.getElementById('val-reper').value = caz.reper;
+            document.getElementById('val-nume-v').value = caz.numeV;
+            document.getElementById('val-prenume-v').value = caz.prenumeV;
+            document.getElementById('val-varsta').value = caz.varsta;
+            document.getElementById('val-sex').value = caz.sex;
+            document.getElementById('val-cnp').value = caz.cnp;
+            document.getElementById('val-nume-a').value = caz.numeA;
+            document.getElementById('val-prenume-a').value = caz.prenumeA;
+            document.getElementById('val-telefon').value = caz.telefon;
+            
+            const badge = document.getElementById('badge-timpi-count');
+            if(badge) badge.innerText = caz.timpi.length;
+        }
+
+        function incarcaFisaMisiuneTerminata(caz) {
+            incarcaFisaMisiune(caz);
+            document.getElementById('fisa-status').value = 'Terminat (Arhivă)';
+            
+            document.getElementById('btn-selectie-status-⚙️').style.display = 'none';
+            const statusBtns = document.querySelectorAll('#coloana-status-misiune button.status-btn');
+            statusBtns.forEach(b => {
+                b.style.pointerEvents = 'none';
+                b.style.opacity = '0.4';
+            });
+        }
+
+        function deschideFisaMisiuneCurenta() {
+            if (misiuneCurentaFizica) {
+                incarcaFisaMisiune(misiuneCurentaFizica);
+            }
+            document.getElementById('panou-accept-refuz').classList.add('hidden');
+            deschideFisaMisiune();
+        }
+
+        function deschideFisaPrespitaliceasca() {
+            document.getElementById('ecran-meniu').classList.add('hidden');
+            document.getElementById('ecran-lista-misiuni').classList.add('hidden');
+            document.getElementById('ecran-stare-resursa').classList.add('hidden');
+            document.getElementById('ecran-misiune').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Fişă prespitalicească';
+            document.getElementById('btn-back').classList.remove('hidden');
+            
+            const badge = document.getElementById('badge-timpi-count');
+            if(badge && misiuneCurentaFizica) badge.innerText = misiuneCurentaFizica.timpi.length;
+        }
+
+        function deschideTimpiInterventie() {
+            const tbody = document.getElementById('tabel-timpi-body');
+            tbody.innerHTML = '';
+
+            if (!timpiInregistrati || timpiInregistrati.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="border border-gray-300 p-3 text-center text-gray-500 italic">Nu există timpi înregistrați încă. Apăsați butoanele de status în timpul intervenției.</td></tr>`;
+            } else {
+                timpiInregistrati.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50';
+                    tr.innerHTML = `
+                        <td class="border border-gray-300 p-2 font-bold text-gray-900">${item.status}</td>
+                        <td class="border border-gray-300 p-2 font-mono font-bold text-blue-700 tracking-wider text-[13px]">${item.ora}</td>
+                        <td class="border border-gray-300 p-2 font-mono text-gray-600">${item.data}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Timpi intervenție';
+        }
+
+        function alertDeschidereChenar(nume) {
+            alert('Deschidere secțiune: ' + nume);
+        }
+
+        function acceptaMisiuneaCurenta() {
+            audio.pause();
+            audio.currentTime = 0;
+
+            if (misiuneSelectataIndex !== null) {
+                misiuneCurentaFizica = listaMisiuniNepreluate[misiuneSelectataIndex];
+                listaMisiuniNepreluate.splice(misiuneSelectataIndex, 1);
+                misiuneSelectataIndex = null;
+            }
+
+            timpiInregistrati = misiuneCurentaFizica.timpi;
+
+            const ramas = listaMisiuniNepreluate.length;
+            const btnMisiuni = document.getElementById('btn-misiuni');
+            document.getElementById('badge-misiuni').innerText = ramas;
+            document.getElementById('header-alert').innerText = ramas;
+
+            if (ramas === 0) {
+                btnMisiuni.className = 'tile-btn btn-inactiv-total';
+                document.getElementById('header-alert').classList.remove('bg-red-600');
+            } else {
+                btnMisiuni.className = 'tile-btn bg-misiuni-alert';
+            }
+            
+            const btnCurenta = document.getElementById('btn-misiune-curenta');
+            btnCurenta.classList.remove('btn-inactiv-total', 'bg-misiune-curenta-inactiv');
+            btnCurenta.classList.add('bg-misiune-curenta-activ');
+            document.getElementById('badge-misiune-curenta').innerText = '1';
+
+            document.getElementById('panou-accept-refuz').classList.add('hidden');
+
+            const toateButoaneleStatus = [
+                document.getElementById('btn-status-spre-caz'),
+                document.getElementById('btn-status-destinatie'),
+                document.getElementById('btn-status-la-caz'),
+                document.getElementById('btn-status-spre-spital'),
+                document.getElementById('btn-status-la-spital')
+            ];
+            toateButoaneleStatus.forEach(b => {
+                b.classList.remove('status-activ', 'status-inactiv-gri');
+                b.style.backgroundColor = '#ea580c';
+            });
+            butonAnterior = null;
+
+            schimbaStarePunct('Spre caz', document.getElementById('btn-status-spre-caz'));
+        }
+
+        function refuzaMisiuneaCurenta() {
+            audio.pause();
+            audio.currentTime = 0;
+
+            if (misiuneSelectataIndex !== null) {
+                listaMisiuniNepreluate.splice(misiuneSelectataIndex, 1);
+            }
+
+            const ramas = listaMisiuniNepreluate.length;
+            const btnMisiuni = document.getElementById('btn-misiuni');
+            document.getElementById('badge-misiuni').innerText = ramas;
+            document.getElementById('header-alert').innerText = ramas;
+
+            if (ramas === 0) {
+                btnMisiuni.className = 'tile-btn btn-inactiv-total';
+                document.getElementById('header-alert').classList.remove('bg-red-600');
+            }
+
+            document.getElementById('panou-accept-refuz').classList.add('hidden');
+            deschideMeniu();
+        }
+
+        function deschideFisaMisiune() {
+            document.getElementById('ecran-meniu').classList.add('hidden');
+            document.getElementById('ecran-lista-misiuni').classList.add('hidden');
+            document.getElementById('ecran-stare-resursa').classList.add('hidden');
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+            document.getElementById('ecran-misiune').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Misiune';
+            document.getElementById('btn-back').classList.remove('hidden');
+        }
+
+        function deschideMeniu() {
+            document.getElementById('ecran-misiune').classList.add('hidden');
+            document.getElementById('ecran-lista-misiuni').classList.add('hidden');
+            document.getElementById('ecran-stare-resursa').classList.add('hidden');
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+            document.getElementById('ecran-meniu').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Meniu principal';
+            document.getElementById('btn-back').classList.add('hidden');
+        }
+
+        function deschideStareResursa() {
+            document.getElementById('ecran-meniu').classList.add('hidden');
+            document.getElementById('ecran-misiune').classList.add('hidden');
+            document.getElementById('ecran-lista-misiuni').classList.add('hidden');
+            document.getElementById('ecran-fisa-prespitaliceasca').classList.add('hidden');
+            document.getElementById('ecran-tabel-timpi').classList.add('hidden');
+            document.getElementById('ecran-stare-resursa').classList.remove('hidden');
+            document.getElementById('header-titlu').innerText = 'Setare status misiune';
+            document.getElementById('btn-back').classList.remove('hidden');
+        }
+
+        function schimbaStarePunct(stareNoua, elementButon) {
+            document.getElementById('txt-stare').innerText = 'Starea curentă: ' + stareNoua;
+            document.getElementById('fisa-status').value = stareNoua;
+
+            inregistreazaTimpStatus(stareNoua);
+
+            let btnCurent = elementButon;
+            if (!btnCurent) {
+                if (stareNoua === 'Spre caz') btnCurent = document.getElementById('btn-status-spre-caz');
+                else if (stareNoua === 'La destinație') btnCurent = document.getElementById('btn-status-destinatie');
+                else if (stareNoua === 'La caz') btnCurent = document.getElementById('btn-status-la-caz');
+                else if (stareNoua === 'Spre spital') btnCurent = document.getElementById('btn-status-spre-spital');
+                else if (stareNoua === 'La spital') btnCurent = document.getElementById('btn-status-la-spital');
+            }
+
+            if (butonAnterior && butonAnterior !== btnCurent) {
+                butonAnterior.classList.remove('status-activ');
+                butonAnterior.classList.add('status-inactiv-gri');
+                butonAnterior.style.backgroundColor = '';
+            }
+
+            if (btnCurent) {
+                btnCurent.classList.remove('status-inactiv-gri');
+                btnCurent.classList.add('status-activ');
+                btnCurent.style.backgroundColor = '';
+                butonAnterior = btnCurent;
+            }
+        }
+
+        function schimbaStareResursaDinMeniu(stare) {
+            if (stare === 'Terminat') {
+                if (misiuneCurentaFizica) {
+                    inregistreazaTimpStatus('Terminat');
+                    listaMisiuniTerminate.push(misiuneCurentaFizica);
+                    misiuneCurentaFizica = null;
+                }
+
+                document.getElementById('badge-terminate').innerText = listaMisiuniTerminate.length;
+
+                document.getElementById('txt-stare').innerText = 'Starea curentă: Disponibila';
+                document.getElementById('fisa-status').value = 'Terminat';
+
+                const btnCurenta = document.getElementById('btn-misiune-curenta');
+                btnCurenta.classList.remove('bg-misiune-curenta-activ');
+                btnCurenta.classList.add('btn-inactiv-total');
+                document.getElementById('badge-misiune-curenta').innerText = '0';
+
+                if (butonAnterior) {
+                    butonAnterior.classList.remove('status-activ');
+                    butonAnterior.classList.add('status-inactiv-gri');
+                    butonAnterior.style.backgroundColor = '';
+                    butonAnterior = null;
+                }
+
+                document.getElementById('panou-accept-refuz').classList.add('hidden');
+                deschideMeniu();
+            } else {
+                document.getElementById('txt-stare').innerText = 'Starea curentă: ' + stare;
+                document.getElementById('fisa-status').value = stare;
+                schimbaStarePunct(stare);
+                deschideFisaMisiuneCurenta();
+            }
+        }
+
+        document.getElementById('btn-status-spre-caz').onclick = function() { schimbaStarePunct('Spre caz', this); };
+        document.getElementById('btn-status-destinatie').onclick = function() { schimbaStarePunct('La destinație', this); };
+        document.getElementById('btn-status-la-caz').onclick = function() { schimbaStarePunct('La caz', this); };
+        document.getElementById('btn-status-spre-spital').onclick = function() { schimbaStarePunct('Spre spital', this); };
+        document.getElementById('btn-status-la-spital').onclick = function() { schimbaStarePunct('La spital', this); };
+    </script>
+</body>
+</html>
